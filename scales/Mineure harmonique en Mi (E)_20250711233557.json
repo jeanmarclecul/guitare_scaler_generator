@@ -1,0 +1,15 @@
+{
+  "tuning": "standard",
+  "root": "E",
+  "scale": "harmonic_minor",
+  "highlightedFrets": [
+    "1-7",
+    "2-9",
+    "2-10",
+    "1-10",
+    "1-9",
+    "2-7",
+    "3-8",
+    "3-9"
+  ]
+}
