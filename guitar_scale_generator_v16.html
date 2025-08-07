@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur de Gammes Guitare 24 Cases V16</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .controls {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-group label {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        select {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.9);
+            font-size: 1em;
+            color: #333;
+            cursor: pointer;
+            min-width: 150px;
+        }
+
+        select:focus {
+            outline: 2px solid #fff;
+            background: white;
+        }
+
+        .fretboard {
+            background: #8B4513;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            overflow-x: auto;
+        }
+
+        .string {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+            position: relative;
+        }
+
+        .string:last-child {
+            margin-bottom: 0;
+        }
+
+        .string-label {
+            width: 30px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #fff;
+            background: rgba(0,0,0,0.3);
+            padding: 8px 5px;
+            border-radius: 5px;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+
+        .frets {
+            display: flex;
+            flex: 1;
+            background: #D2B48C;
+        }
+
+        .fret {
+            width: 40px;
+            height: 40px;
+            border-right: 1px solid #654321;
+            border-top: 1px solid #654321;
+            border-bottom: 1px solid #654321;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .fret:first-child {
+            border-left: 1px solid #654321;
+        }
+
+        .fret:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .fret.open {
+            background: #F5DEB3;
+        }
+
+        .fret.note {
+            background: #FF6B6B;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .fret.note::before {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: #FF6B6B;
+            border-radius: 50%;
+            z-index: -1;
+        }
+
+        .fret.root {
+            background: #4ECDC4;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .fret.root::before {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: #4ECDC4;
+            border-radius: 50%;
+            z-index: -1;
+        }
+
+        .fret.highlighted {
+            background: #FFD700 !important;
+            color: #333 !important;
+            font-weight: bold;
+            box-shadow: 0 3px 12px rgba(255,215,0,0.5) !important;
+        }
+
+        .fret.highlighted::before {
+            background: #FFD700 !important;
+        }
+
+        .fret.highlighted-root {
+            background: #FFA500 !important; /* Orange lumineux */
+            color: #333 !important;
+            font-weight: bold;
+            box-shadow: 0 3px 12px rgba(255, 165, 0, 0.7) !important;
+        }
+
+        .fret.highlighted-root::before {
+            background: #FFA500 !important;
+        }
+
+        .fret-numbers {
+            display: flex;
+            margin-left: 40px;
+            margin-bottom: 10px;
+        }
+
+        .fret-number {
+            width: 40px;
+            text-align: center;
+            font-size: 0.9em;
+            color: #fff;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .fret-number.marker {
+            color: #FFD700;
+            font-size: 1.2em;
+        }
+
+        .scale-info {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .scale-info h3 {
+            margin-bottom: 15px;
+            font-size: 1.4em;
+            text-align: center;
+        }
+
+        .intervals {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .interval {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        .notes-display {
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+
+        .legend-color.root {
+            background: #4ECDC4;
+        }
+
+        .legend-color.note {
+            background: #FF6B6B;
+        }
+
+        .legend-color.highlighted {
+            background: #FFD700;
+        }
+
+        .legend-color.highlighted-root {
+            background: #FFA500;
+        }
+
+        .clear-highlights {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            margin: 10px auto;
+            display: block;
+            transition: all 0.2s ease;
+        }
+
+        .clear-highlights:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        /* --- NOUVEAUX STYLES POUR LES ACCORDS --- */
+        .chords-section {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 30px 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .chords-section h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .chords-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .chord-diagram {
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .chord-diagram svg {
+            display: block;
+            margin: 0 auto;
+        }
+        /* --- FIN DES NOUVEAUX STYLES --- */
+
+        .tablature-editor {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .tablature-editor h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .tab-controls {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .tab-controls button {
+            background-color: #f39c12;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            margin: 0 5px;
+            transition: all 0.2s ease;
+        }
+
+        .tab-controls button:hover {
+            background-color: #e67e22;
+            transform: translateY(-2px);
+        }
+
+        .tablature-measure {
+            display: inline-block;
+            vertical-align: top;
+            margin: 0 5px 15px;
+            padding: 10px;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 10px;
+            background: rgba(0,0,0,0.2);
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre;
+            min-width: 200px;
+            overflow-x: auto;
+        }
+
+        .tablature-line {
+            line-height: 1.2;
+        }
+
+        .tab-input-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .tab-string-label {
+            width: 25px;
+            font-weight: bold;
+            margin-right: 5px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .tab-input {
+            background: rgba(255,255,255,0.9);
+            border: none;
+            color: #333;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 5px;
+            border-radius: 5px;
+            flex-grow: 1;
+        }
+
+        .effects-legend {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .fret {
+                width: 35px;
+                height: 35px;
+            }
+
+            .fret-number {
+                width: 35px;
+            }
+
+            .string-label {
+                width: 25px;
+                font-size: 1em;
+                padding: 6px 3px;
+            }
+
+            .frets {
+                min-width: calc(35px * 25);
+            }
+
+            .fret-numbers {
+                margin-left: 35px;
+                min-width: calc(35px * 25);
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .legend {
+                gap: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .fret {
+                width: 30px;
+                height: 30px;
+                font-size: 0.8em;
+            }
+
+            .fret-number {
+                width: 30px;
+                font-size: 0.8em;
+            }
+
+            .string-label {
+                width: 22px;
+                font-size: 0.9em;
+                padding: 5px 2px;
+            }
+
+            .frets {
+                min-width: calc(30px * 25);
+            }
+
+            .fret-numbers {
+                margin-left: 32px;
+                min-width: calc(30px * 25);
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎸 Générateur de Gammes Guitare V16</h1>
+            <p>Explorez toutes les gammes sur un manche 24 cases</p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="tuning">Accordage:</label>
+                <select id="tuning">
+                    <option value="standard">Standard (EADGBE)</option>
+                    <option value="dropd">Drop D (DADGBE)</option>
+                    <option value="openg">Open G (DGDGBD)</option>
+                    <option value="opend">Open D (DADF#AD)</option>
+                    <option value="dadgad">DADGAD</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="root">Tonalité:</label>
+                <select id="root">
+                    <option value="C">Do (C)</option>
+                    <option value="C#">Do# (C#)</option>
+                    <option value="D">Ré (D)</option>
+                    <option value="D#">Ré# (D#)</option>
+                    <option value="E">Mi (E)</option>
+                    <option value="F">Fa (F)</option>
+                    <option value="F#">Fa# (F#)</option>
+                    <option value="G">Sol (G)</option>
+                    <option value="G#">Sol# (G#)</option>
+                    <option value="A">La (A)</option>
+                    <option value="A#">La# (A#)</option>
+                    <option value="B">Si (B)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="scale">Gamme/Mode:</label>
+                <select id="scale">
+                    <optgroup label="Gammes Majeures">
+                        <option value="major">Majeure (Ionien)</option>
+                        <option value="dorian">Dorien</option>
+                        <option value="phrygian">Phrygien</option>
+                        <option value="lydian">Lydien</option>
+                        <option value="mixolydian">Mixolydien</option>
+                        <option value="aeolian">Aéolien (Mineur naturel)</option>
+                        <option value="locrian">Locrien</option>
+                    </optgroup>
+                    <optgroup label="Gammes Mineures">
+                        <option value="minor">Mineure naturelle</option>
+                        <option value="harmonic_minor">Mineure harmonique</option>
+                        <option value="melodic_minor">Mineure mélodique</option>
+                    </optgroup>
+                    <optgroup label="Pentatoniques">
+                        <option value="major_pentatonic">Pentatonique majeure</option>
+                        <option value="minor_pentatonic">Pentatonique mineure</option>
+                    </optgroup>
+                    <optgroup label="Blues">
+                        <option value="blues">Blues</option>
+                        <option value="blues_major">Blues majeur</option>
+                    </optgroup>
+                    <optgroup label="Gammes Exotiques">
+                        <option value="chromatic">Chromatique</option>
+                        <option value="whole_tone">Tons entiers</option>
+                        <option value="diminished">Diminuée</option>
+                        <option value="spanish">Espagnole (Phrygien dominant)</option>
+                        <option value="gypsy">Gitane</option>
+                        <option value="arabic">Arabe</option>
+                        <option value="japanese">Japonaise (Hirajoshi)</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <button id="saveButton" style="padding: 10px 20px; border-radius: 8px; border: none; background-color: #4CAF50; color: white; font-size: 1em; cursor: pointer; margin-top: 10px;">Sauvegarder les réglages</button>
+                <button id="loadButton" style="padding: 10px 20px; border-radius: 8px; border: none; background-color: #008CBA; color: white; font-size: 1em; cursor: pointer; margin-top: 10px;">Charger les réglages</button>
+            </div>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color root"></div>
+                <span>Note fondamentale</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color note"></div>
+                <span>Notes de la gamme</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color highlighted-root"></div>
+                <span>Note fondamentale mise en évidence</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color highlighted"></div>
+                <span>Autres notes mises en évidence</span>
+            </div>
+        </div>
+
+        <button class="clear-highlights" onclick="clearHighlights()">🧹 Effacer les mises en évidence</button>
+
+        <div class="fretboard">
+            <div class="fret-numbers" id="fretNumbers"></div>
+            <div id="fretboard"></div>
+            <div class="fret-numbers" id="fretNumbersBottom"></div>
+        </div>
+
+        <div class="scale-info">
+            <h3 id="scaleTitle">Gamme Majeure en Do</h3>
+            <div class="intervals" id="intervals"></div>
+            <div class="notes-display" id="notesDisplay"></div>
+        </div>
+
+        <div class="chords-section">
+            <h3>Accords Simplifiés du Mode</h3>
+            <div class="chords-container" id="chordsContainer">
+                </div>
+        </div>
+
+        <div class="tablature-editor">
+            <h3>Éditeur de Tablature</h3>
+            <div class="tab-controls">
+                <button id="addMeasure">Ajouter une Mesure</button>
+                <button id="clearTab">Effacer la Tablature</button>
+            </div>
+            <div id="tablatureContainer"></div>
+        </div>
+
+        <div class="effects-legend">
+            <h4>Symboles des Effets:</h4>
+            <p>h = Hammer-on, p = Pull-off, b = Bend, r = Release Bend, / = Slide up, \ = Slide down, v ou ~ = Vibrato, x = Muted note, t = Tapping, &lt; > = Harmonic</p>
+        </div>
+    </div>
+
+    <script>
+        // Configuration des notes
+        const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        const notesDisplay = {
+            'C': 'Do', 'C#': 'Do#', 'D': 'Ré', 'D#': 'Ré#', 'E': 'Mi', 'F': 'Fa',
+            'F#': 'Fa#', 'G': 'Sol', 'G#': 'Sol#', 'A': 'La', 'A#': 'La#', 'B': 'Si'
+        };
+
+        // Accordages
+        const tunings = {
+            standard: ['E', 'A', 'D', 'G', 'B', 'E'],
+            dropd: ['D', 'A', 'D', 'G', 'B', 'E'],
+            openg: ['D', 'G', 'D', 'G', 'B', 'D'],
+            opend: ['D', 'A', 'D', 'F#', 'A', 'D'],
+            dadgad: ['D', 'A', 'D', 'G', 'A', 'D']
+        };
+
+        // Définition des gammes (intervalles en demi-tons)
+        const scales = {
+            major: { name: 'Majeure (Ionien)', intervals: [0, 2, 4, 5, 7, 9, 11], formula: ['1', '2', '3', '4', '5', '6', '7'] },
+            minor: { name: 'Mineure naturelle', intervals: [0, 2, 3, 5, 7, 8, 10], formula: ['1', '2', 'b3', '4', '5', 'b6', 'b7'] },
+            dorian: { name: 'Dorien', intervals: [0, 2, 3, 5, 7, 9, 10], formula: ['1', '2', 'b3', '4', '5', '6', 'b7'] },
+            phrygian: { name: 'Phrygien', intervals: [0, 1, 3, 5, 7, 8, 10], formula: ['1', 'b2', 'b3', '4', '5', 'b6', 'b7'] },
+            lydian: { name: 'Lydien', intervals: [0, 2, 4, 6, 7, 9, 11], formula: ['1', '2', '3', '#4', '5', '6', '7'] },
+            mixolydian: { name: 'Mixolydien', intervals: [0, 2, 4, 5, 7, 9, 10], formula: ['1', '2', '3', '4', '5', '6', 'b7'] },
+            aeolian: { name: 'Aéolien (Mineur naturel)', intervals: [0, 2, 3, 5, 7, 8, 10], formula: ['1', '2', 'b3', '4', '5', 'b6', 'b7'] },
+            locrian: { name: 'Locrien', intervals: [0, 1, 3, 5, 6, 8, 10], formula: ['1', 'b2', 'b3', '4', 'b5', 'b6', 'b7'] },
+            harmonic_minor: { name: 'Mineure harmonique', intervals: [0, 2, 3, 5, 7, 8, 11], formula: ['1', '2', 'b3', '4', '5', 'b6', '7'] },
+            melodic_minor: { name: 'Mineure mélodique', intervals: [0, 2, 3, 5, 7, 9, 11], formula: ['1', '2', 'b3', '4', '5', '6', '7'] },
+            major_pentatonic: { name: 'Pentatonique majeure', intervals: [0, 2, 4, 7, 9], formula: ['1', '2', '3', '5', '6'] },
+            minor_pentatonic: { name: 'Pentatonique mineure', intervals: [0, 3, 5, 7, 10], formula: ['1', 'b3', '4', '5', 'b7'] },
+            blues: { name: 'Blues', intervals: [0, 3, 5, 6, 7, 10], formula: ['1', 'b3', '4', 'b5', '5', 'b7'] },
+            blues_major: { name: 'Blues majeur', intervals: [0, 2, 3, 4, 7, 9], formula: ['1', '2', 'b3', '3', '5', '6'] },
+            chromatic: { name: 'Chromatique', intervals: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], formula: ['1', 'b2', '2', 'b3', '3', '4', 'b5', '5', 'b6', '6', 'b7', '7'] },
+            whole_tone: { name: 'Tons entiers', intervals: [0, 2, 4, 6, 8, 10], formula: ['1', '2', '3', '#4', '#5', 'b7'] },
+            diminished: { name: 'Diminuée', intervals: [0, 2, 3, 5, 6, 8, 9, 11], formula: ['1', '2', 'b3', '4', 'b5', 'b6', '6', '7'] },
+            spanish: { name: 'Espagnole (Phrygien dominant)', intervals: [0, 1, 4, 5, 7, 8, 10], formula: ['1', 'b2', '3', '4', '5', 'b6', 'b7'] },
+            gypsy: { name: 'Gitane', intervals: [0, 2, 3, 6, 7, 8, 11], formula: ['1', '2', 'b3', '#4', '5', 'b6', '7'] },
+            arabic: { name: 'Arabe', intervals: [0, 1, 4, 5, 7, 8, 11], formula: ['1', 'b2', '3', '4', '5', 'b6', '7'] },
+            japanese: { name: 'Japonaise (Hirajoshi)', intervals: [0, 2, 3, 7, 8], formula: ['1', '2', 'b3', '5', 'b6'] }
+        };
+
+        // --- NOUVEAU: Base de données des accords (SIMPLIFIÉS) ---
+        const chordQualities = { // Qualités des accords pour les gammes à 7 notes
+            major:      ['major', 'minor', 'minor', 'major', 'major', 'minor', 'minor'],
+            ionian:     ['major', 'minor', 'minor', 'major', 'major', 'minor', 'minor'],
+            dorian:     ['minor', 'minor', 'major', 'major', 'minor', 'minor', 'major'],
+            phrygian:   ['minor', 'major', 'major', 'minor', 'minor', 'major', 'minor'],
+            lydian:     ['major', 'major', 'minor', 'minor', 'major', 'minor', 'minor'],
+            mixolydian: ['major', 'minor', 'minor', 'major', 'minor', 'minor', 'major'],
+            aeolian:    ['minor', 'minor', 'major', 'minor', 'minor', 'major', 'major'],
+            minor:      ['minor', 'minor', 'major', 'minor', 'minor', 'major', 'major'],
+            locrian:    ['minor', 'major', 'minor', 'minor', 'major', 'major', 'minor'],
+            harmonic_minor: ['minor', 'minor', 'major', 'minor', 'major', 'major', 'minor'],
+            // Les autres gammes n'ont pas de système d'accords diatoniques simple à 7 degrés
+        };
+
+        const chordVoicings = { // [E, A, D, G, B, e], x=muted, 0=open. baseFret = 1 si diagramme sur frettes 1-5
+            // Majeur
+            'C':  { frets: ['x', 3, 2, 0, 1, 0], baseFret: 1 }, 'C#': { frets: ['x', 4, 6, 6, 6, 4], baseFret: 4 },
+            'D':  { frets: ['x', 'x', 0, 2, 3, 2], baseFret: 1 }, 'D#': { frets: ['x', 6, 8, 8, 8, 6], baseFret: 6 },
+            'E':  { frets: [0, 2, 2, 1, 0, 0], baseFret: 1 }, 'F':  { frets: [1, 3, 3, 2, 1, 1], baseFret: 1 },
+            'F#': { frets: [2, 4, 4, 3, 2, 2], baseFret: 2 }, 'G':  { frets: [3, 2, 0, 0, 0, 3], baseFret: 1 },
+            'G#': { frets: [4, 6, 6, 5, 4, 4], baseFret: 4 }, 'A':  { frets: ['x', 0, 2, 2, 2, 0], baseFret: 1 },
+            'A#': { frets: ['x', 1, 3, 3, 3, 1], baseFret: 1 }, 'B':  { frets: ['x', 2, 4, 4, 4, 2], baseFret: 2 },
+            // Mineur
+            'Cm':  { frets: ['x', 3, 5, 5, 4, 3], baseFret: 3 }, 'C#m': { frets: ['x', 4, 6, 6, 5, 4], baseFret: 4 },
+            'Dm':  { frets: ['x', 'x', 0, 2, 3, 1], baseFret: 1 }, 'D#m': { frets: ['x', 6, 8, 8, 7, 6], baseFret: 6 },
+            'Em':  { frets: [0, 2, 2, 0, 0, 0], baseFret: 1 }, 'Fm':  { frets: [1, 3, 3, 1, 1, 1], baseFret: 1 },
+            'F#m': { frets: [2, 4, 4, 2, 2, 2], baseFret: 2 }, 'Gm':  { frets: [3, 5, 5, 3, 3, 3], baseFret: 3 },
+            'G#m': { frets: [4, 6, 6, 4, 4, 4], baseFret: 4 }, 'Am':  { frets: ['x', 0, 2, 2, 1, 0], baseFret: 1 },
+            'A#m': { frets: ['x', 1, 3, 3, 2, 1], baseFret: 1 }, 'Bm':  { frets: ['x', 2, 4, 4, 3, 2], baseFret: 2 },
+            // Diminué
+            'Cdim':  { frets: ['x', 3, 4, 5, 4, 'x'], baseFret: 3 }, 'C#dim': { frets: ['x', 4, 5, 6, 5, 'x'], baseFret: 4 },
+            'Ddim':  { frets: ['x', 'x', 0, 1, 3, 1], baseFret: 1 }, 'D#dim': { frets: ['x', 'x', 1, 2, 4, 2], baseFret: 1 },
+            'Edim':  { frets: ['x', 'x', 2, 3, 2, 3], baseFret: 2 }, 'Fdim':  { frets: [1, 2, 3, 1, 'x', 'x'], baseFret: 1 },
+            'F#dim': { frets: [2, 3, 4, 2, 'x', 'x'], baseFret: 2 }, 'Gdim':  { frets: [3, 4, 5, 3, 'x', 'x'], baseFret: 3 },
+            'G#dim': { frets: ['x', 'x', 'x', 5, 4, 5], baseFret: 4 }, 'Adim':  { frets: ['x', 0, 1, 2, 1, 'x'], baseFret: 1 },
+            'A#dim': { frets: ['x', 1, 2, 3, 2, 'x'], baseFret: 1 }, 'Bdim':  { frets: ['x', 2, 3, 4, 3, 'x'], baseFret: 2 },
+            // Augmenté (pour mineur harmonique)
+            'Caug':  { frets: ['x', 3, 2, 1, 1, 'x'], baseFret: 1 },
+            'Gaug':  { frets: [3, 2, 1, 0, 0, 'x'], baseFret: 1 },
+            'D#aug': { frets: ['x', 6, 5, 4, 4, 'x'], baseFret: 4 },
+        };
+        // --- FIN de la base de données ---
+
+        // Variables globales
+        let currentTuning = 'standard';
+        let currentRoot = 'C';
+        let currentScale = 'major';
+        let highlightedFrets = new Set();
+
+        function getNoteAt(stringNote, fret) {
+            const startIndex = notes.indexOf(stringNote);
+            return notes[(startIndex + fret) % 12];
+        }
+
+        function handleFretClick(fretElement, stringIndex, fretNumber) {
+            const fretId = `${stringIndex}-${fretNumber}`;
+            if (highlightedFrets.has(fretId)) {
+                highlightedFrets.delete(fretId);
+                fretElement.classList.remove('highlighted', 'highlighted-root');
+            } else {
+                highlightedFrets.add(fretId);
+                if (fretElement.classList.contains('root')) {
+                    fretElement.classList.add('highlighted-root');
+                } else {
+                    fretElement.classList.add('highlighted');
+                }
+            }
+        }
+
+        function clearHighlights() {
+            highlightedFrets.clear();
+            document.querySelectorAll('.fret.highlighted, .fret.highlighted-root').forEach(fret => {
+                fret.classList.remove('highlighted', 'highlighted-root');
+            });
+        }
+
+        function generateFretNumbers() {
+            const fretNumbers = document.getElementById('fretNumbers');
+            const fretNumbersBottom = document.getElementById('fretNumbersBottom');
+            fretNumbers.innerHTML = '';
+            fretNumbersBottom.innerHTML = '';
+            for (let i = 0; i <= 24; i++) {
+                const fretNumber = document.createElement('div');
+                fretNumber.className = 'fret-number';
+                fretNumber.textContent = i === 0 ? '' : i;
+                const fretNumberBottom = document.createElement('div');
+                fretNumberBottom.className = 'fret-number';
+                fretNumberBottom.textContent = i === 0 ? '' : i;
+                if ([3, 5, 7, 9, 12, 15, 17, 19, 21, 24].includes(i)) {
+                    fretNumber.classList.add('marker');
+                    fretNumberBottom.classList.add('marker');
+                }
+                fretNumbers.appendChild(fretNumber);
+                fretNumbersBottom.appendChild(fretNumberBottom);
+            }
+        }
+
+        function generateFretboard() {
+            const fretboard = document.getElementById('fretboard');
+            const tuning = tunings[currentTuning];
+            const scaleIntervals = scales[currentScale].intervals;
+            fretboard.innerHTML = '';
+            for (let stringIndex = tuning.length - 1; stringIndex >= 0; stringIndex--) {
+                const stringElement = document.createElement('div');
+                stringElement.className = 'string';
+                const stringLabel = document.createElement('div');
+                stringLabel.className = 'string-label';
+                stringLabel.textContent = tuning[stringIndex];
+                stringElement.appendChild(stringLabel);
+                const fretsElement = document.createElement('div');
+                fretsElement.className = 'frets';
+                for (let fret = 0; fret <= 24; fret++) {
+                    const fretElement = document.createElement('div');
+                    fretElement.className = 'fret';
+                    if (fret === 0) fretElement.classList.add('open');
+                    const noteAtFret = getNoteAt(tuning[stringIndex], fret);
+                    const rootIndex = notes.indexOf(currentRoot);
+                    const noteIndex = notes.indexOf(noteAtFret);
+                    const intervalFromRoot = (noteIndex - rootIndex + 12) % 12;
+                    if (scaleIntervals.includes(intervalFromRoot)) {
+                        if (intervalFromRoot === 0) {
+                            fretElement.classList.add('root');
+                        } else {
+                            fretElement.classList.add('note');
+                        }
+                        fretElement.textContent = notesDisplay[noteAtFret];
+                    }
+                    fretElement.addEventListener('click', () => handleFretClick(fretElement, stringIndex, fret));
+                    const fretId = `${stringIndex}-${fret}`;
+                    if (highlightedFrets.has(fretId)) {
+                        if (intervalFromRoot === 0) {
+                            fretElement.classList.add('highlighted-root');
+                        } else {
+                            fretElement.classList.add('highlighted');
+                        }
+                    }
+                    fretsElement.appendChild(fretElement);
+                }
+                stringElement.appendChild(fretsElement);
+                fretboard.appendChild(stringElement);
+            }
+        }
+
+        function updateScaleInfo() {
+            const scale = scales[currentScale];
+            const scaleTitle = document.getElementById('scaleTitle');
+            const intervalsEl = document.getElementById('intervals');
+            const notesDisplayElement = document.getElementById('notesDisplay');
+            scaleTitle.textContent = `${scale.name} en ${notesDisplay[currentRoot]} (${currentRoot})`;
+            intervalsEl.innerHTML = '';
+            scale.formula.forEach(interval => {
+                const intervalElement = document.createElement('div');
+                intervalElement.className = 'interval';
+                intervalElement.textContent = interval;
+                intervalsEl.appendChild(intervalElement);
+            });
+            const rootIndex = notes.indexOf(currentRoot);
+            const scaleNotes = scale.intervals.map(interval => {
+                const noteIndex = (rootIndex + interval) % 12;
+                const noteName = notes[noteIndex];
+                return `${notesDisplay[noteName]} (${noteName})`;
+            });
+            notesDisplayElement.textContent = `Notes: ${scaleNotes.join(' - ')}`;
+        }
+
+        // --- NOUVELLE FONCTION POUR GÉNÉRER UN DIAGRAMME D'ACCORD SVG ---
+        function generateChordSVG(voicing, name) {
+            const { frets, baseFret } = voicing;
+            const numFrets = 5;
+            const stringSpacing = 20;
+            const fretSpacing = 25;
+            const dotRadius = 7;
+            const width = stringSpacing * 5;
+            const height = fretSpacing * numFrets;
+
+            let svg = `<svg width="${width + 30}" height="${height + 50}" font-family="Arial, sans-serif" font-size="12px" fill="white">`;
+            svg += `<text x="${(width+30)/2}" y="15" text-anchor="middle" font-weight="bold">${name}</text>`;
+
+            // Fret de base (si ce n'est pas un accord ouvert)
+            if (baseFret > 1) {
+                svg += `<text x="-2" y="${25 + fretSpacing / 2}" text-anchor="end" font-size="14px">${baseFret}fr</text>`;
+            }
+
+            // Sillet ou ligne de frette supérieure
+            const nutHeight = baseFret > 1 ? 2 : 6;
+            svg += `<rect x="15" y="25" width="${width}" height="${nutHeight}" fill="#ccc" />`;
+
+            // Cordes
+            for (let i = 0; i < 6; i++) {
+                const x = 15 + i * stringSpacing;
+                svg += `<line x1="${x}" y1="25" x2="${x}" y2="${25 + height}" stroke="#ccc" stroke-width="1" />`;
+            }
+
+            // Frettes
+            for (let i = 1; i <= numFrets; i++) {
+                const y = 25 + i * fretSpacing;
+                svg += `<line x1="15" y1="${y}" x2="${15 + width}" y2="${y}" stroke="#999" stroke-width="1" />`;
+            }
+
+            // Points et symboles X/O
+            for (let i = 0; i < 6; i++) {
+                const x = 15 + i * stringSpacing;
+                const fret = frets[5 - i]; // Inverser car notre DB est EADGBe et le dessin est eBGDAE
+
+                if (fret === 'x') {
+                    svg += `<text x="${x}" y="20" text-anchor="middle" font-weight="bold" fill="#ff6b6b">x</text>`;
+                } else if (fret === 0) {
+                    svg += `<circle cx="${x}" cy="16" r="5" stroke="white" stroke-width="1" fill="none" />`;
+                } else if (fret >= baseFret && fret < baseFret + numFrets) {
+                    const fretPos = fret - baseFret + 1;
+                    const y = 25 + fretPos * fretSpacing - (fretSpacing / 2);
+                    svg += `<circle cx="${x}" cy="${y}" r="${dotRadius}" fill="white" />`;
+                }
+            }
+
+            svg += `</svg>`;
+            return svg;
+        }
+
+        // --- NOUVELLE FONCTION POUR METTRE À JOUR L'AFFICHAGE DES ACCORDS ---
+        function updateChordDisplay() {
+            const container = document.getElementById('chordsContainer');
+            container.innerHTML = 'Analyse des accords...';
+
+            const qualities = chordQualities[currentScale];
+            const scale = scales[currentScale];
+
+            if (!qualities || !scale.intervals || scale.intervals.length < 7) {
+                 container.innerHTML = "Pas d'accords diatoniques standards pour cette gamme.";
+                 return;
+            }
+
+            container.innerHTML = '';
+            const rootIndex = notes.indexOf(currentRoot);
+
+            for(let i = 0; i < scale.intervals.length; i++) {
+                const chordRootIndex = (rootIndex + scale.intervals[i]) % 12;
+                const chordRootName = notes[chordRootIndex];
+                const quality = qualities[i];
+                let lookupKey = chordRootName;
+                let displayName = `${notesDisplay[chordRootName]} ${quality.charAt(0).toUpperCase() + quality.slice(1)}`;
+
+                if (quality === 'minor') {
+                    lookupKey += 'm';
+                } else if (quality === 'diminished') {
+                    lookupKey += 'dim';
+                } else if (quality === 'augmented') {
+                    lookupKey += 'aug';
+                }
+
+                const voicing = chordVoicings[lookupKey];
+
+                const diagramDiv = document.createElement('div');
+                diagramDiv.className = 'chord-diagram';
+
+                if (voicing) {
+                    diagramDiv.innerHTML = generateChordSVG(voicing, displayName);
+                } else {
+                    diagramDiv.innerHTML = `<div style="width: 125px; height: 160px; display: flex; align-items: center; justify-content: center; text-align: center;">${displayName}<br>(Voicing non trouvé)</div>`;
+                }
+                container.appendChild(diagramDiv);
+            }
+        }
+
+        function updateDisplay() {
+            generateFretboard();
+            updateScaleInfo();
+            updateChordDisplay(); // Appel de la nouvelle fonction
+        }
+
+        document.getElementById('tuning').addEventListener('change', (e) => {
+            currentTuning = e.target.value;
+            updateDisplay();
+        });
+
+        document.getElementById('root').addEventListener('change', (e) => {
+            currentRoot = e.target.value;
+            updateDisplay();
+        });
+
+        document.getElementById('scale').addEventListener('change', (e) => {
+            currentScale = e.target.value;
+            updateDisplay();
+        });
+
+        function saveSettings() {
+            const settings = {
+                tuning: document.getElementById('tuning').value,
+                root: document.getElementById('root').value,
+                scale: document.getElementById('scale').value,
+                highlightedFrets: Array.from(highlightedFrets)
+            };
+            const dataStr = JSON.stringify(settings, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const scaleName = scales[currentScale].name.replace(/[^a-zA-Z0-9\s-()]/g, '').replace(/\s+/g, ' ');
+            const rootNote = `${notesDisplay[currentRoot]} (${currentRoot})`;
+            const now = new Date();
+            const timestamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
+            const fileName = `${scaleName} en ${rootNote}_${timestamp}.json`;
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function loadSettings() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const settings = JSON.parse(event.target.result);
+                        document.getElementById('tuning').value = settings.tuning;
+                        document.getElementById('root').value = settings.root;
+                        document.getElementById('scale').value = settings.scale;
+                        currentTuning = settings.tuning;
+                        currentRoot = settings.root;
+                        currentScale = settings.scale;
+                        highlightedFrets = new Set(settings.highlightedFrets);
+                        updateDisplay();
+                    } catch (error) {
+                        alert('Erreur lors du chargement du fichier : Fichier JSON invalide.');
+                        console.error('Error parsing JSON file:', error);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        document.getElementById('saveButton').addEventListener('click', saveSettings);
+        document.getElementById('loadButton').addEventListener('click', loadSettings);
+
+        // Initialisation de la tablature
+        const tablatureContainer = document.getElementById('tablatureContainer');
+        const addMeasureButton = document.getElementById('addMeasure');
+        const clearTabButton = document.getElementById('clearTab');
+        const defaultMeasureContent = `
+e|----------------|
+B|----------------|
+G|----------------|
+D|----------------|
+A|----------------|
+E|----------------|
+`.trim();
+
+        function createTabMeasure() {
+            const measureDiv = document.createElement('div');
+            measureDiv.className = 'tablature-measure';
+            measureDiv.contentEditable = true;
+            measureDiv.spellcheck = false;
+            measureDiv.innerHTML = defaultMeasureContent;
+            tablatureContainer.appendChild(measureDiv);
+        }
+
+        function clearTablature() {
+            tablatureContainer.innerHTML = '';
+            createTabMeasure();
+        }
+
+        addMeasureButton.addEventListener('click', createTabMeasure);
+        clearTabButton.addEventListener('click', clearTablature);
+
+        // Initialisation de l'application
+        generateFretNumbers();
+        updateDisplay();
+        createTabMeasure();
+
+    </script>
+</body>
+</html>
